@@ -87,7 +87,7 @@ class velha(object):
 
 	def move_ai(self,marca,board):
 		livre = self.livres(board)
-		# oponente = 'O' if marca == 'X' else 'X'
+		oponente = 'O' if marca == 'X' else 'X'
 		# mai_ganho = -1
 		# men_perda = -1
 		# for x in livre:
@@ -125,10 +125,31 @@ class velha(object):
 		# 	print 'de melhores'
 		# 	return melhores[movera]
 		# else:
-		movemm = self.negamax(board,marca,len(livre))
 		# if movemm > -1:
+		if len(livre) == 9: # evita de ter que executar todas as jogadas
+			self.move(self.board,4,marca) # para descobrir que no centro eh melhor jogada
+			return 4
+		centro = {0:1,2:5,6:3,8:7}
 		melhormov = 0
 		melhorpont = 0
+		if len(livre) == 8:
+			if board[0] == oponente or board[2] == oponente or board[6] == oponente or board[8] == oponente:
+				if board[0] == oponente:
+					self.move(self.board,centro[0],marca)
+					return centro[0]
+				if board[2] == oponente:
+					self.move(self.board,centro[2],marca)
+					return centro[2]
+				if board[6] == oponente:
+					self.move(self.board,centro[6],marca)
+					return centro[6]
+				if board[8] == oponente:
+					self.move(self.board,centro[8],marca)
+					return centro[8]
+		if len(livre) == 1: 
+			self.move(self.board,livre[0],marca)
+			return livre[0]
+		movemm = self.negamax(board,marca,len(livre))
 		for x in range(9):
 			if self.melhor[x] > melhorpont:
 				melhorpont = self.melhor[x]
@@ -144,18 +165,18 @@ class velha(object):
 		# 	return moveremos
 	def negamax(self,board,marca,terminal):
 		# definindo atual igual board
+		oponente = 'O' if marca == 'X' else 'X' # descobrindo oponente
 		atual = ['-' for x in range(9)]
 		for i in range(9):
 			atual[i] = board[i]
 		moves = self.livres(atual) # pegando movimentos livres
-		oponente = 'O' if marca == 'X' else 'X' # descobrindo oponente
 		bestMove = -1 # guardara melhor movimento
 		bestValue = -1 # guardara melhor valor
 		value = -10
-		if terminal == 0 or self.vence(marca,board): # retorna se for no terminal ou venceu
-			if self.vence(marca,board): return 1,None
-			if self.vence(oponente,board): return -1,None
-			if len(moves) == 0 and not self.vence(marca,board) and not self.vence(oponente,board): return 0,None
+		if terminal == 0 or self.vence(marca,atual): # retorna se for no terminal ou venceu
+			if self.vence(marca,atual): return 1,None
+			if self.vence(oponente,atual): return -1,None
+			if len(moves) == 0 and not self.vence(marca,atual) and not self.vence(oponente,atual): return 0,None
 		for move in moves: # verifica todos os movimentos
 			atual[move] = marca # move para teste atual
 			value = -self.negamax(atual,oponente,terminal-1)[0] # valor e igual ao negativo do valor do oponente
