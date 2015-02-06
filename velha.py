@@ -1,6 +1,7 @@
 import time
 import random
 import os
+import sys
 class velha(object):
 	melhor = {0:0,1:0,2:0,
 			  3:0,4:0,5:0,
@@ -29,6 +30,16 @@ class velha(object):
 		elif ('posix' in os.name):
 			os.system('clear')
 
+		if len(sys.argv) > 1:
+			if sys.argv[1] == 'debug':
+				tam = len(str(self.melhor[0])+' | '+str(self.melhor[1])+' | '+str(self.melhor[2]))
+				print str(self.melhor[0]),'|',str(self.melhor[1]),'|',str(self.melhor[2])
+				print '-'*tam
+				print str(self.melhor[3]),'|',str(self.melhor[4]),'|',str(self.melhor[5])
+				print '-'*tam
+				print str(self.melhor[6]),'|',str(self.melhor[7]),'|',str(self.melhor[8])
+				print '*'*50
+
 		for x in range(9):
 			velha.melhor[x] = 0
 
@@ -48,8 +59,6 @@ class velha(object):
 		return False
 
 	def imprime(self,board):
-		file = open('jogos.txt','a')
-		print 'Jogo Atual:'
 		print ' | '.join(board[0:3])
 		print '-'*10
 		print ' | '.join(board[3:6])
@@ -78,32 +87,32 @@ class velha(object):
 
 	def move_ai(self,marca,board):
 		livre = self.livres(board)
-		oponente = 'O' if marca == 'X' else 'X'
-		mai_ganho = -1
-		men_perda = -1
-		for x in livre:
-			board[x] = marca
-			if self.vence(marca,board):
-				mai_ganho = x
-				break
-			else:
-				board[x] = '-'
-		for x in livre:
-			board[x] = oponente
-			if self.vence(oponente,board):
-				men_perda = x
-				board[x] = '-'
-				break
-			else:
-				board[x] = '-'
-		if mai_ganho > -1:
-			self.move(self.board,mai_ganho,marca)
-			self.salva('de ganho')
-			return mai_ganho
-		if mai_ganho == -1 and men_perda > -1:
-		 	self.move(self.board,men_perda,marca)
-		 	self.salva('de perda')
-		 	return men_perda
+		# oponente = 'O' if marca == 'X' else 'X'
+		# mai_ganho = -1
+		# men_perda = -1
+		# for x in livre:
+		# 	board[x] = marca
+		# 	if self.vence(marca,board):
+		# 		mai_ganho = x
+		# 		break
+		# 	else:
+		# 		board[x] = '-'
+		# for x in livre:
+		# 	board[x] = oponente
+		# 	if self.vence(oponente,board):
+		# 		men_perda = x
+		# 		board[x] = '-'
+		# 		break
+		# 	else:
+		# 		board[x] = '-'
+		# if mai_ganho > -1:
+		# 	self.move(self.board,mai_ganho,marca)
+		# 	self.salva('de ganho')
+		# 	return mai_ganho
+		# if mai_ganho == -1 and men_perda > -1:
+		#  	self.move(self.board,men_perda,marca)
+		#  	self.salva('de perda')
+		#  	return men_perda
 
 		# if len(livre) > 6:
 		# 	melhores = []
@@ -115,23 +124,24 @@ class velha(object):
 		# 	self.move(self.board,melhores[movera],marca)
 		# 	print 'de melhores'
 		# 	return melhores[movera]
-		else:
-				movemm = self.negamax(board,marca,len(livre))
-				if movemm > -1:
-					melhormov = 0
-					melhorpont = 0
-					for x in range(9):
-						if self.melhor[x] > melhorpont:
-							melhorpont = self.melhor[x]
-							melhormov = x
-					self.move(self.board,melhormov,marca)
-					self.salva('de negamax movimento '+str(self.desconverte(movemm[1]))+' pontos '+str(movemm[0]))
-					return movemm[1]
-				else:
-					moveremos = random.randint(0,len(livre)-1)
-					self.move(self.board,livre[moveremos],marca)
-					self.salva('de aleatorio')
-					return moveremos
+		# else:
+		movemm = self.negamax(board,marca,len(livre))
+		# if movemm > -1:
+		melhormov = 0
+		melhorpont = 0
+		for x in range(9):
+			if self.melhor[x] > melhorpont:
+				melhorpont = self.melhor[x]
+				melhormov = x
+		if melhormov == 0: melhormov == movemm[1]
+		self.move(self.board,melhormov,marca)
+		self.salva('de negamax movimento '+str(self.desconverte(melhormov))+' pontos '+str(melhorpont))
+		return melhormov
+		# else:
+		# 	moveremos = random.randint(0,len(livre)-1)
+		# 	self.move(self.board,livre[moveremos],marca)
+		# 	self.salva('de aleatorio')
+		# 	return moveremos
 	def negamax(self,board,marca,terminal):
 		# definindo atual igual board
 		atual = ['-' for x in range(9)]
@@ -153,7 +163,7 @@ class velha(object):
 				bestValue = value
 				bestMove = move
 			atual[move] = '-'
-		self.melhor[bestMove] += 1
+		self.melhor[bestMove] += bestValue
 		return bestValue,bestMove
 	def vence(self,marca,board):
 		for x in self.vic:
@@ -162,9 +172,11 @@ class velha(object):
 		return False
 
 	def salva(self,texto):
-		arquivo = open('salvos.txt','a')
-		arquivo.write('\n'+texto)
-		arquivo.close()
+		if len(sys.argv) > 1:
+			if sys.argv[1] == 'debug':
+				arquivo = open('salvos.txt','a')
+				arquivo.write('\n'+texto)
+				arquivo.close()
 
 	def player_move(self,movimento,marca):
 		self.move(self.board,self.converter(movimento),marca)
@@ -219,16 +231,16 @@ while True:
 			velha.analises = 0
 			print 'Computador pensando na jogada'
 			time.sleep(1)
-			if len(velha.livres(velha.board)) == 10:
-				move = random.randint(0,8)
-				velha.move(velha.board,move,marca_inicio)
-			else:
-				move = velha.move_ai(marca_inicio,velha.board)
-			print 'tentei',velha.desconverte(move)
+			move = velha.move_ai(marca_inicio,velha.board)
 			velha.salva('tentei '+str(velha.desconverte(move)))
 			vez_pc = False
 		else:
-			player = int(raw_input('Posicao: '))
+			player = 0
+			while player not in [velha.desconverte(x) for x in velha.livres(velha.board)]:
+				try:
+					player = int(raw_input('Posicao(1 a 9): '))
+				except (ValueError,TypeError):
+					pass
 			velha.player_move(player,oponente)
 			velha.salva('player jogou '+str(player))
 			vez_pc = True
