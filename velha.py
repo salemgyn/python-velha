@@ -1,8 +1,8 @@
-import time
 import random
 import os
 import sys
 class velha(object):
+	placar = [0,0,0]
 	melhor = {0:0,1:0,2:0,
 			  3:0,4:0,5:0,
 			  6:0,7:0,8:0,
@@ -59,6 +59,8 @@ class velha(object):
 		return False
 
 	def imprime(self,board):
+		print 'O: '+str(self.placar[0])+' -: '+str(self.placar[1])+' X: '+str(self.placar[2])
+		print '*'*50
 		print ' | '.join(board[0:3])
 		print '-'*10
 		print ' | '.join(board[3:6])
@@ -88,81 +90,38 @@ class velha(object):
 	def move_ai(self,marca,board):
 		livre = self.livres(board)
 		oponente = 'O' if marca == 'X' else 'X'
-		# mai_ganho = -1
-		# men_perda = -1
-		# for x in livre:
-		# 	board[x] = marca
-		# 	if self.vence(marca,board):
-		# 		mai_ganho = x
-		# 		break
-		# 	else:
-		# 		board[x] = '-'
-		# for x in livre:
-		# 	board[x] = oponente
-		# 	if self.vence(oponente,board):
-		# 		men_perda = x
-		# 		board[x] = '-'
-		# 		break
-		# 	else:
-		# 		board[x] = '-'
-		# if mai_ganho > -1:
-		# 	self.move(self.board,mai_ganho,marca)
-		# 	self.salva('de ganho')
-		# 	return mai_ganho
-		# if mai_ganho == -1 and men_perda > -1:
-		#  	self.move(self.board,men_perda,marca)
-		#  	self.salva('de perda')
-		#  	return men_perda
-
-		# if len(livre) > 6:
-		# 	melhores = []
-		# 	nao_obrigado = [1,3,5,7]
-		# 	for i in range(len(livre)):
-		# 		if i not in nao_obrigado:
-		# 			melhores.append(i)
-		# 	movera = random.randint(0,len(melhores)-1)
-		# 	self.move(self.board,melhores[movera],marca)
-		# 	print 'de melhores'
-		# 	return melhores[movera]
-		# else:
-		# if movemm > -1:
+		mai_ganho = -1
+		men_perda = -1
+		for x in livre:
+			board[x] = marca
+			if self.vence(marca,board):
+				mai_ganho = x
+				break
+			else:
+				board[x] = '-'
+		for x in livre:
+			board[x] = oponente
+			if self.vence(oponente,board):
+				men_perda = x
+				board[x] = '-'
+				break
+			else:
+				board[x] = '-'
+		if mai_ganho > -1:
+			self.move(self.board,mai_ganho,marca)
+			self.salva('de ganho')
+			return mai_ganho
+		if mai_ganho == -1 and men_perda > -1:
+		 	self.move(self.board,men_perda,marca)
+		 	self.salva('de perda')
+		 	return men_perda
 		if len(livre) == 9: # evita de ter que executar todas as jogadas
 			self.move(self.board,4,marca) # para descobrir que no centro eh melhor jogada
 			return 4
-		centro = {0:1,2:5,6:3,8:7}
-		melhormov = 0
-		melhorpont = 0
-		if len(livre) == 8:
-			if board[0] == oponente or board[2] == oponente or board[6] == oponente or board[8] == oponente:
-				if board[0] == oponente:
-					self.move(self.board,centro[0],marca)
-					return centro[0]
-				if board[2] == oponente:
-					self.move(self.board,centro[2],marca)
-					return centro[2]
-				if board[6] == oponente:
-					self.move(self.board,centro[6],marca)
-					return centro[6]
-				if board[8] == oponente:
-					self.move(self.board,centro[8],marca)
-					return centro[8]
-		if len(livre) == 1: 
-			self.move(self.board,livre[0],marca)
-			return livre[0]
 		movemm = self.negamax(board,marca,len(livre))
-		for x in range(9):
-			if self.melhor[x] > melhorpont:
-				melhorpont = self.melhor[x]
-				melhormov = x
-		if melhormov == 0: melhormov == movemm[1]
-		self.move(self.board,melhormov,marca)
-		self.salva('de negamax movimento '+str(self.desconverte(melhormov))+' pontos '+str(melhorpont))
-		return melhormov
-		# else:
-		# 	moveremos = random.randint(0,len(livre)-1)
-		# 	self.move(self.board,livre[moveremos],marca)
-		# 	self.salva('de aleatorio')
-		# 	return moveremos
+		self.move(self.board,movemm[1],marca)
+		self.salva('de negamax movimento '+str(self.desconverte(movemm[1]))+' pontos '+str(movemm[0]))
+		return movemm[1]
 	def negamax(self,board,marca,terminal):
 		# definindo atual igual board
 		oponente = 'O' if marca == 'X' else 'X' # descobrindo oponente
@@ -249,9 +208,7 @@ while True:
 		velha.clear()
 		velha.imprime(velha.board)
 		if vez_pc:
-			velha.analises = 0
 			print 'Computador pensando na jogada'
-			time.sleep(1)
 			move = velha.move_ai(marca_inicio,velha.board)
 			velha.salva('tentei '+str(velha.desconverte(move)))
 			vez_pc = False
@@ -265,13 +222,19 @@ while True:
 			velha.player_move(player,oponente)
 			velha.salva('player jogou '+str(player))
 			vez_pc = True
+	velha.clear()
 	velha.imprime(velha.board)
 	campeao = velha.venceu()
 	if campeao == '-':
 		print 'Jogo terminou empatado'
 		velha.salva('Jogo terminou empatado')
+		velha.placar[1] += 1
 	else:
 		print '\'',campeao,'\'ganhou o jogo'
+		if campeao == 'O':
+			velha.placar[0] += 1
+		if campeao == 'X':
+			velha.placar[2] += 1
 		velha.salva('\' '+campeao+'\' ganhou o jogo')
 	velha.salva('*'*50)
 	raw_input('Pressione qualquer tecla para continuar')
